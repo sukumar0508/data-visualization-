@@ -1,0 +1,133 @@
+Word Count MapReduce Code:-
+-------------------------------
+ Mapper Logic:
+--------------program------------
+
+import java.io.IOException;
+
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.io.IntWritable;
+
+import org.apache.hadoop.io.LongWritable;
+
+import org.apache.hadoop.io.Text;
+
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+
+  @Override
+
+  public void map(LongWritable key, Text value, Context con)
+
+      throws IOException, InterruptedException {
+
+    String line = value.toString();
+
+    String[] words = line.split("\\s");
+
+    for(String s:words) {
+
+                con.write(new Text(s), new IntWritable(1));
+
+    }
+
+  }
+
+}
+
+ 
+--------------------------------
+
+Reducer Logic:
+----------program---------------
+
+
+import java.io.IOException;
+
+import org.apache.hadoop.io.IntWritable;
+
+import org.apache.hadoop.io.Text;
+
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    @Override
+
+  public void reduce(Text key, Iterable<IntWritable> values,Context con)
+
+      throws IOException, InterruptedException {  
+
+                  int sum = 0;
+
+                  for(IntWritable i:values) {
+
+                                  sum = sum + i.get();
+
+                  }
+
+                  con.write(key, new IntWritable(sum));
+
+      }
+
+}
+
+ 
+------------------------------------
+ 
+
+Driver Logic:
+-----------------program--------------------
+
+
+import org.apache.hadoop.fs.Path;
+
+import org.apache.hadoop.io.IntWritable;
+
+import org.apache.hadoop.io.Text;
+
+import org.apache.hadoop.mapreduce.Job;
+
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCountDriver {
+
+  public static void main(String[] args) throws Exception {
+
+    if (args.length != 2) {
+
+      System.err.println("Usage: WordCount <input path> <output path>");
+
+      System.exit(-1);
+
+    }
+
+     Job job = new Job();
+
+    job.setJarByClass(WordCountDriver.class);
+
+    job.setJobName("Word Count");
+
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+    job.setMapperClass(WordCountMapper.class);
+
+    job.setReducerClass(WordCountReducer.class);
+
+    job.setOutputKeyClass(Text.class);
+
+    job.setOutputValueClass(IntWritable.class);
+
+       System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+   }
+
+}
+
+ 

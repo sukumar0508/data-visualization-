@@ -1,0 +1,45 @@
+Pig & Hive User Defined Functions Sample Code:-
+------------------------------------------------
+Pig User Defined Function : 
+---------------------------
+
+package com.hadoop;  
+import java.io.IOException;  
+import org.apache.pig.EvalFunc;  
+import org.apache.pig.data.Tuple;  
+public class TestUpper extends EvalFunc<String>   {  
+    public String exec(Tuple input) throws IOException {    
+        if (input == null || input.size() == 0)    
+        return null;    
+        try{    
+                    String str = (String)input.get(0);    
+        return str.toUpperCase();    
+        }catch(Exception e){    
+        throw new IOException("Caught exception processing input row ", e);    
+                }    
+            }  
+} 
+-------------------------------------------------------- 
+Hive User Defined Function:
+
+package com.lbrce.hiveudf;
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.hive.ql.exec.UDF;
+import org.apache.hadoop.io.Text;
+public class Strip extends UDF {
+private Text result = new Text();
+ public Text evaluate(Text str, String stripChars) {
+ if(str == null) {
+ return null;
+ }
+ result.set(StringUtils.strip(str.toString(), stripChars));
+ return result;
+ }
+ public Text evaluate(Text str) {
+ if(str == null) {
+ return null;
+ }
+ result.set(StringUtils.strip(str.toString()));
+ return result;
+ }
+}
